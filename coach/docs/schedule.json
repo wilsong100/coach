@@ -1,0 +1,72 @@
+{
+    "program_name": "12-Week Sub-20 5K & Strength Integration",
+    "athlete_profile": {
+      "current_5k_baseline": "22:59",
+      "target_5k_pace": "3:59/km",
+      "injury_concerns": ["lower back", "ankles"]
+    },
+    "weekly_structure": {
+      "monday": { "activity": "Strength Workout A", "focus": "Foundational Stability" },
+      "tuesday": { "activity": "Run: Speed Intervals", "focus": "VO2 Max / Zone 5 Training" },
+      "wednesday": { "activity": "Strength Workout B", "focus": "Posterior Chain / Lower Back Health" },
+      "thursday": { "activity": "Run: Tempo", "focus": "Lactate Threshold / Zone 4" },
+      "friday": { "activity": "Strength Workout C", "focus": "Full Body Integration" },
+      "saturday": { "activity": "Run: Long Run", "focus": "Aerobic Capacity" },
+      "sunday": { "activity": "Rest & Mobility", "focus": "Recovery" }
+    },
+    "periodization_phases": [
+      {
+        "phase": "Base & Threshold Building",
+        "weeks": [1, 2, 3],
+        "running_progression": {
+          "week_1": { "speed": "8 x 400m @ 3:50/km (90s rest)", "tempo": "4km @ 4:25/km", "long": "10km @ 5:30/km" },
+          "week_2": { "speed": "6 x 600m @ 3:50/km (90s rest)", "tempo": "5km @ 4:20/km", "long": "11km @ 5:25/km" },
+          "week_3": { "speed": "5 x 800m @ 3:45/km (2m rest)", "tempo": "6km @ 4:15/km", "long": "12km @ 5:20/km" }
+        }
+      },
+      {
+        "phase": "First Recovery & Consolidation",
+        "weeks": [4],
+        "running_progression": {
+          "week_4": { "speed": "4 x 400m easy", "tempo": "Test: 3km @ 4:05/km", "long": "8km very easy" }
+        }
+      },
+      {
+        "phase": "Speed Endurance & Zone 5 Exposure",
+        "weeks": [5, 6, 7],
+        "running_progression": {
+          "week_5": { "speed": "10 x 400m @ 3:45/km (60s rest)", "tempo": "7km @ 4:20/km", "long": "12km @ 5:20/km" },
+          "week_6": { "speed": "6 x 800m @ 3:45/km (2m rest)", "tempo": "5km @ 4:10/km", "long": "13km @ 5:15/km" },
+          "week_7": { "speed": "4 x 1km @ 3:50/km (2m rest)", "tempo": "8km @ 4:15/km", "long": "14km @ 5:15/km" }
+        }
+      },
+      {
+        "phase": "Second Recovery",
+        "weeks": [8],
+        "running_progression": {
+          "week_8": { "speed": "5 x 200m strides", "tempo": "4km easy", "long": "10km easy" }
+        }
+      },
+      {
+        "phase": "Peak Race Specificity",
+        "weeks": [9, 10, 11],
+        "running_progression": {
+          "week_9": { "speed": "5 x 1km @ 3:45/km (90s rest)", "tempo": "6km @ 4:05/km", "long": "12km @ 5:10/km" },
+          "week_10": { "speed": "3 x 1600m @ 3:50/km (2m rest)", "tempo": "7km @ 4:05/km", "long": "10km @ 5:10/km" },
+          "week_11": { "speed": "12 x 400m @ 3:40/km (60s rest)", "tempo": "4km @ 3:59/km (Goal Pace)", "long": "8km easy" }
+        }
+      },
+      {
+        "phase": "Taper & Goal Attempt",
+        "weeks": [12],
+        "running_progression": {
+          "week_12": { "speed": "4 x 400m @ Goal Pace", "tempo": "2km easy", "long": "GOAL RACE: SUB-20 ATTEMPT" }
+        }
+      }
+    ],
+    "strength_progression_rules": {
+      "upper_body": "Maintain shoulder-safe neutral grips; increase weight by 1-2kg only if form is perfect.",
+      "lower_body": "Focus on eccentric control for ankle health; prioritize bar speed over maximum load.",
+      "core": "Increase duration of carries and planks by 5-10 seconds per week."
+    }
+  }

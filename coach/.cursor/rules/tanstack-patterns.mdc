@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+# TanStack Query & AI Patterns
+
+- Use TanStack Query for ALL server state management (no useState for server data)
+- Create custom hooks in `hooks/` directory following pattern: `use[Resource]Query`, `use[Resource]Mutation`
+- Use TanStack AI for chatbot functionality, not for data fetching
+- Implement proper error handling and loading states in all Query hooks
+- Use React Query DevTools in development
+- Cache invalidation should be explicit and intentional
