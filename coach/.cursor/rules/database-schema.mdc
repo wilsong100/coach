@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+# Database Schema Guidelines
+
+- All tables must have: id (uuid, primary key), created_at (timestamp), updated_at (timestamp)
+- Use Row Level Security (RLS) for all tables - users can only access their own data
+- Foreign keys should be properly indexed
+- Use Supabase TypeScript types generator: `supabase gen types typescript`
+- Reference schedule.json structure for workout/run data models

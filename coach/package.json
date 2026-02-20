@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
     "@tanstack/ai": "^0.5.1",
     "@tanstack/ai-gemini": "^0.5.0",
     "@tanstack/ai-react": "^0.5.4",
