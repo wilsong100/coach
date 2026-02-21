@@ -36,10 +36,12 @@ export function useWeeklyReports(
   config?: UseQueryOptions<SupabaseWeeklyReportRow[], PostgrestError>,
 ) {
   const { queryKey, queryFn, ...rest } = config ?? {};
+  const defaultKey = ['weeklyReports', filters];
+  const defaultFn = () => fetchWeeklyReports(filters);
 
   return useQuery<SupabaseWeeklyReportRow[], PostgrestError>({
-    queryKey: ['weeklyReports', filters],
-    queryFn: () => fetchWeeklyReports(filters),
+    queryKey: queryKey ?? defaultKey,
+    queryFn: queryFn ?? defaultFn,
     staleTime: 1000 * 60 * 5,
     ...rest,
   });

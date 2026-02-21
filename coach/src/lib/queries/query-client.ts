@@ -10,6 +10,3 @@ export const queryClient = new QueryClient({
     },
   },
 });
-
-// TODO: wrap `QueryClientProvider` in the app root and add React Query DevTools
-// once `@tanstack/react-query-devtools` is installed.

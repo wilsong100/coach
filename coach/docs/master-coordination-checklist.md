@@ -11,21 +11,21 @@
 - [x] **Branch created**: `git switch feature/data-architect`
 - [x] **Database migrations**: Complete (pending commit/push verification)
 - [x] **TypeScript types**: Complete (pending commit/push verification)
-- [ ] **TanStack Query hooks**: Complete
-- [ ] **Query client setup**: Complete
-- [x] **Status**: 🚧 In progress
-- [x] **Last update**: Feb 20, 2026 12:56 GMT
+- [x] **TanStack Query hooks**: Complete
+- [x] **Query client setup**: Complete
+- [x] **Status**: ✅ Ready for merge
+- [x] **Last update**: Feb 21, 2026 17:11 GMT
 
 **Key deliverables for other agents:**
-- [ ] `types/supabase.ts` - Generated Supabase types
-- [ ] `types/workout.ts` - Workout domain types
-- [ ] `types/run.ts` - Running domain types
-- [ ] `types/report.ts` - Report domain types
-- [ ] `hooks/use-workout-plans.ts` - Hook available
-- [ ] `hooks/use-workout-sessions.ts` - Hook available
-- [ ] `hooks/use-running-sessions.ts` - Hook available
-- [ ] `hooks/use-strava-activities.ts` - Hook available
-- [ ] `hooks/use-weekly-reports.ts` - Hook available
+- [x] `types/supabase.ts` - Generated Supabase types
+- [x] `types/workout.ts` - Workout domain types
+- [x] `types/run.ts` - Running domain types
+- [x] `types/report.ts` - Report domain types
+- [x] `hooks/use-workout-plans.ts` - Hook available
+- [x] `hooks/use-workout-sessions.ts` - Hook available
+- [x] `hooks/use-running-sessions.ts` - Hook available
+- [x] `hooks/use-strava-activities.ts` - Hook available
+- [x] `hooks/use-weekly-reports.ts` - Hook available
 
 **Dependencies exposed:**
 - Database schema (migrations)
@@ -166,13 +166,12 @@
 
 ### Current Blockers
 1. **Agent 2**: Work appears staged locally but not committed/pushed to `feature/integration-specialist` - **Waiting for**: `git commit` + `git push` + paste `git show --name-only --oneline HEAD`
-2. **Agent 1**: Work appears present locally as untracked (e.g. `coach/supabase/`, `coach/types/`, `coach/src/hooks/`) but not committed/pushed to `feature/data-architect` - **Waiting for**: `git switch feature/data-architect` → add/commit/push + paste `git show --name-only --oneline HEAD`
-3. **Agent 1**: `pnpm install` fails (ENOTFOUND `registry.npmjs.org`) - **Waiting for**: network/DNS restored OR avoid adding new dependencies until connectivity returns
 
 ### Resolved Blockers
 - [x] Feb 20, 2026 - Agent 1 fixed `public.users` RLS policy to use `id = auth.uid()`
 - [x] Feb 20, 2026 - Agent 1 added `public.ensure_user_profile` trigger on `auth.users` to keep `public.users` in sync for RLS/current_profile_id()
 - [x] Feb 20, 2026 - Agent 1 placed migration in `coach/supabase/migrations/0001_data_architect.sql` (confirm canonical Supabase directory; avoid duplicate root `supabase/` copy)
+- [x] Feb 21, 2026 - Agent 1 reran `pnpm install` after transient `registry.npmjs.org` ENOTFOUND errors; dependencies (including `@tanstack/react-query-devtools`) now install successfully
 
 ---
 

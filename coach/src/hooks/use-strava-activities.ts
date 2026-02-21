@@ -31,10 +31,12 @@ export function useStravaActivities(
   config?: UseQueryOptions<SupabaseStravaActivityRow[], PostgrestError>,
 ) {
   const { queryKey, queryFn, ...rest } = config ?? {};
+  const defaultKey = ['stravaActivities', filters];
+  const defaultFn = () => fetchStravaActivities(filters);
 
   return useQuery<SupabaseStravaActivityRow[], PostgrestError>({
-    queryKey: ['stravaActivities', filters],
-    queryFn: () => fetchStravaActivities(filters),
+    queryKey: queryKey ?? defaultKey,
+    queryFn: queryFn ?? defaultFn,
     staleTime: 1000 * 60 * 2,
     ...rest,
   });
