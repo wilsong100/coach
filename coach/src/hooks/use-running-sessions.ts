@@ -38,10 +38,12 @@ export function useRunningSessions(
   config?: UseQueryOptions<SupabaseRunningSessionRow[], PostgrestError>,
 ) {
   const { queryKey, queryFn, ...rest } = config ?? {};
+  const defaultKey = ['runningSessions', filters];
+  const defaultFn = () => fetchRunningSessions(filters);
 
   return useQuery<SupabaseRunningSessionRow[], PostgrestError>({
-    queryKey: ['runningSessions', filters],
-    queryFn: () => fetchRunningSessions(filters),
+    queryKey: queryKey ?? defaultKey,
+    queryFn: queryFn ?? defaultFn,
     staleTime: 1000 * 60 * 2,
     ...rest,
   });

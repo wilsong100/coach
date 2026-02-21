@@ -22,8 +22,8 @@ export function useWorkoutPlans(
   const { queryKey, queryFn, ...rest } = config ?? {};
 
   return useQuery<SupabaseWorkoutPlanRow[], PostgrestError>({
-    queryKey: ['workoutPlans'],
-    queryFn: fetchWorkoutPlans,
+    queryKey: queryKey ?? ['workoutPlans'],
+    queryFn: queryFn ?? fetchWorkoutPlans,
     staleTime: 1000 * 60 * 5,
     ...rest,
   });
