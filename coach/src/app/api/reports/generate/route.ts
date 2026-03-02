@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createHash } from 'node:crypto';
-import { supabaseServiceRoleClient } from '@/lib/supabase-server';
+import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { generateGeminiText } from '@/lib/ai/gemini-client';
 import { loadProgramProfile } from '@/lib/parsers/schedule-parser';
 
@@ -76,20 +76,22 @@ export async function POST(request: Request) {
   const startIso = formatDateString(start);
   const endIso = formatDateString(end);
 
+  const supabase = getSupabaseServerClient();
+
   const [workoutRes, runningRes, stravaRes] = await Promise.all([
-    supabaseServiceRoleClient
+    supabase
       .from('workout_sessions')
       .select('id,scheduled_date,status,session_type,planned_duration_minutes,actual_duration_minutes,performance')
       .eq('user_id', userId)
       .order('scheduled_date', { ascending: false })
       .limit(100),
-    supabaseServiceRoleClient
+    supabase
       .from('running_sessions')
       .select('id,week,day,run_type,target_distance_km,target_pace,status,details,scheduled_date')
       .eq('user_id', userId)
       .order('scheduled_date', { ascending: false })
       .limit(100),
-    supabaseServiceRoleClient
+    supabase
       .from('strava_activities')
       .select('id,distance_meters,duration_seconds,start_time,average_heartrate,max_heartrate')
       .eq('user_id', userId)
@@ -242,7 +244,7 @@ export async function POST(request: Request) {
     status: 'generated',
   };
 
-  const { error: reportError } = await supabaseServiceRoleClient.from('weekly_reports').upsert(reportPayload, {
+  const { error: reportError } = await supabase.from('weekly_reports').upsert(reportPayload, {
     onConflict: 'id',
   });
 

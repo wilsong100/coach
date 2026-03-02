@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServiceRoleClient } from '@/lib/supabase-server';
+import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { importScheduleForUser } from '@/lib/parsers/schedule-parser';
 
 interface ImportPayload {
@@ -15,7 +15,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await importScheduleForUser(supabaseServiceRoleClient, userId);
+    const supabase = getSupabaseServerClient();
+    const result = await importScheduleForUser(supabase, userId);
     return NextResponse.json({ ...result, user_id: userId });
   } catch (error: unknown) {
     return NextResponse.json({ error: (error as Error).message }, { status: 500 });
