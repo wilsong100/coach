@@ -3,7 +3,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { supabaseClient } from "@/lib/supabase-browser";
 import { useStravaActivities } from "@/hooks/use-strava-activities";
-import type { StravaActivitySummary } from "../../../../types/run";
+import type { StravaActivitySummary } from "../../../../../types/run";
 function formatDistance(meters?: string | number | null) {
   const value = Number(meters ?? 0) / 1000;
   if (!value) return "0 km";

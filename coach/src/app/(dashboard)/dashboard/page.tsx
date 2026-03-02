@@ -10,7 +10,7 @@ import { useRunningSessions } from '@/hooks/use-running-sessions';
 import { useStravaActivities } from '@/hooks/use-strava-activities';
 import { useWeeklyReports } from '@/hooks/use-weekly-reports';
 import { useWorkoutSessions } from '@/hooks/use-workout-sessions';
-import type { WeeklyStructureNode, WorkoutSet } from '../../../../types/workout';
+import type { WorkoutSet } from '../../../../types/workout';
 
 const parsePace = (value?: string | null): number | null => {
   if (!value) return null;

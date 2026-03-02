@@ -7,7 +7,7 @@ import { ExerciseCard } from "@/components/workout/exercise-card";
 import { SessionTimer } from "@/components/workout/session-timer";
 import { useExerciseSets } from "@/hooks/use-exercise-sets";
 import { useWorkoutSessions } from "@/hooks/use-workout-sessions";
-import type { SupabaseExerciseSetRow } from "@/types/supabase";
+import type { SupabaseExerciseSetRow } from "../../../../../../types/supabase";
 
 interface WorkoutSessionPageProps {
   params: {
