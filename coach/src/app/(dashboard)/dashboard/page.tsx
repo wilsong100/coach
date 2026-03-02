@@ -10,6 +10,7 @@ import { useRunningSessions } from '@/hooks/use-running-sessions';
 import { useStravaActivities } from '@/hooks/use-strava-activities';
 import { useWeeklyReports } from '@/hooks/use-weekly-reports';
 import { useWorkoutSessions } from '@/hooks/use-workout-sessions';
+import type { WeeklyStructureNode, WorkoutSet } from '../../../../types/workout';
 
 const parsePace = (value?: string | null): number | null => {
   if (!value) return null;
@@ -105,10 +106,10 @@ export default function DashboardPage() {
       const daySessions = workouts.filter((session) => session.scheduled_date?.startsWith(dayKey));
 
       const plannedVolume = daySessions.reduce((sum, session) => {
-        const sets = Array.isArray(session.performance?.sets) ? session.performance?.sets : [];
+        const sets = Array.isArray(session.performance?.sets) ? (session.performance.sets as WorkoutSet[]) : [];
         return (
           sum +
-          sets.reduce((inner, set) => {
+          sets.reduce((inner: number, set: WorkoutSet) => {
             const targetWeight = Number(set?.target_weight ?? 0);
             const targetReps = Number(set?.target_reps ?? 0);
             return inner + targetWeight * targetReps;
@@ -117,10 +118,10 @@ export default function DashboardPage() {
       }, 0);
 
       const actualVolume = daySessions.reduce((sum, session) => {
-        const sets = Array.isArray(session.performance?.sets) ? session.performance?.sets : [];
+        const sets = Array.isArray(session.performance?.sets) ? (session.performance.sets as WorkoutSet[]) : [];
         return (
           sum +
-          sets.reduce((inner, set) => {
+          sets.reduce((inner: number, set: WorkoutSet) => {
             const actualWeight = Number(set?.actual_weight ?? set?.target_weight ?? 0);
             const actualReps = Number(set?.actual_reps ?? set?.target_reps ?? 0);
             return inner + actualWeight * actualReps;
