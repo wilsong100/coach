@@ -78,8 +78,10 @@ export default function DashboardPage() {
       const dayActivities = activities.filter((activity) => activity.start_time?.startsWith(dayKey));
       const actualPaceSeconds = dayActivities.length
         ? dayActivities.reduce((sum, activity) => {
-            const pace = activity.duration_seconds && activity.distance_meters ? activity.duration_seconds / (activity.distance_meters / 1000) : 0;
-            return sum + (pace ?? 0);
+            const durationSeconds = Number(activity.duration_seconds ?? 0);
+            const distanceMeters = Number(activity.distance_meters ?? 0);
+            const pace = distanceMeters > 0 ? durationSeconds / (distanceMeters / 1000) : 0;
+            return sum + pace;
           }, 0) / dayActivities.length
         : null;
 
@@ -106,7 +108,11 @@ export default function DashboardPage() {
       const daySessions = workouts.filter((session) => session.scheduled_date?.startsWith(dayKey));
 
       const plannedVolume = daySessions.reduce((sum, session) => {
-        const sets = Array.isArray(session.performance?.sets) ? (session.performance.sets as WorkoutSet[]) : [];
+        const rawSets =
+          session.performance && typeof session.performance === 'object' && 'sets' in session.performance
+            ? (session.performance as { sets?: unknown }).sets
+            : undefined;
+        const sets = Array.isArray(rawSets) ? (rawSets as WorkoutSet[]) : [];
         return (
           sum +
           sets.reduce((inner: number, set: WorkoutSet) => {
@@ -118,7 +124,11 @@ export default function DashboardPage() {
       }, 0);
 
       const actualVolume = daySessions.reduce((sum, session) => {
-        const sets = Array.isArray(session.performance?.sets) ? (session.performance.sets as WorkoutSet[]) : [];
+        const rawSets =
+          session.performance && typeof session.performance === 'object' && 'sets' in session.performance
+            ? (session.performance as { sets?: unknown }).sets
+            : undefined;
+        const sets = Array.isArray(rawSets) ? (rawSets as WorkoutSet[]) : [];
         return (
           sum +
           sets.reduce((inner: number, set: WorkoutSet) => {

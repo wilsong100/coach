@@ -30,8 +30,8 @@ const colorForRate = (rate: number) => {
   return '#fb923c';
 };
 
-const formatDate = (value: string) => {
-  if (!value) return '';
+const formatDate = (value: unknown) => {
+  if (typeof value !== 'string' || !value) return '';
   const date = new Date(value);
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 };
@@ -52,7 +52,13 @@ export function ComplianceHeatmap({ data, className = '' }: ComplianceHeatmapPro
             tickLine={false}
             fontSize={12}
           />
-          <Tooltip formatter={(value: number) => `${value.toFixed(0)}%`} labelFormatter={formatDate} />
+          <Tooltip
+            formatter={(value) => {
+              const numeric = typeof value === 'number' ? value : Number(value);
+              return `${Number.isFinite(numeric) ? numeric.toFixed(0) : '0'}%`;
+            }}
+            labelFormatter={formatDate}
+          />
           <Bar dataKey="completionRate" barSize={16} radius={[4, 4, 4, 4]}>
             {data.map((entry) => (
               <Cell key={entry.date} fill={colorForRate(entry.completionRate)} />

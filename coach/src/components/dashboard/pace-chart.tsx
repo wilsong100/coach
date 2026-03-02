@@ -33,8 +33,8 @@ const formatPace = (seconds?: number | null) => {
   return `${minutes}:${secs}`;
 };
 
-const formatDate = (value: string) => {
-  if (!value) return '';
+const formatDate = (value: unknown) => {
+  if (typeof value !== 'string' || !value) return '';
   const date = new Date(value);
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 };
@@ -55,8 +55,8 @@ export function PaceChart({ data, className = '' }: PaceChartProps) {
             tickMargin={6}
           />
           <Tooltip
-            formatter={(value: number) => formatPace(Number(value))}
-            labelFormatter={(label) => formatDate(label as string)}
+            formatter={(value) => formatPace(typeof value === 'number' ? value : Number(value))}
+            labelFormatter={(label) => formatDate(label)}
           />
           <Legend align="right" verticalAlign="top" height={36} />
           <Line

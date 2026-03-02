@@ -78,19 +78,19 @@ export async function POST(request: Request) {
 
   const [workoutRes, runningRes, stravaRes] = await Promise.all([
     supabaseServiceRoleClient
-      .from<WorkoutSessionRow>('workout_sessions')
+      .from('workout_sessions')
       .select('id,scheduled_date,status,session_type,planned_duration_minutes,actual_duration_minutes,performance')
       .eq('user_id', userId)
       .order('scheduled_date', { ascending: false })
       .limit(100),
     supabaseServiceRoleClient
-      .from<RunningSessionRow>('running_sessions')
+      .from('running_sessions')
       .select('id,week,day,run_type,target_distance_km,target_pace,status,details,scheduled_date')
       .eq('user_id', userId)
       .order('scheduled_date', { ascending: false })
       .limit(100),
     supabaseServiceRoleClient
-      .from<StravaActivityRow>('strava_activities')
+      .from('strava_activities')
       .select('id,distance_meters,duration_seconds,start_time,average_heartrate,max_heartrate')
       .eq('user_id', userId)
       .gte('start_time', start.toISOString())
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
       const actual = Number(session.actual_duration_minutes ?? 0);
       const rawSets = session.performance?.['sets'];
       const sets = Array.isArray(rawSets) ? (rawSets as Array<Record<string, unknown>>) : [];
-      const { volume, setsCount, reps } = sets.reduce(
+      const { volume, setsCount, reps } = sets.reduce<{ volume: number; setsCount: number; reps: number }>(
         (innerAcc, set) => {
           const targetReps = Number(set['target_reps'] ?? set['actual_reps'] ?? 0);
           const actualReps = Number(set['actual_reps'] ?? set['target_reps'] ?? 0);

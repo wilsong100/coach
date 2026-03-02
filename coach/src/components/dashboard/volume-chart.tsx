@@ -32,8 +32,8 @@ const formatVolume = (value?: number) => {
   return `${Math.round(value)}`;
 };
 
-const formatDate = (value: string) => {
-  if (!value) return '';
+const formatDate = (value: unknown) => {
+  if (typeof value !== 'string' || !value) return '';
   const date = new Date(value);
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 };
@@ -47,8 +47,12 @@ export function VolumeChart({ data, className = '' }: VolumeChartProps) {
           <XAxis dataKey="date" tickFormatter={formatDate} fontSize={12} tickMargin={6} />
           <YAxis tickFormatter={formatVolume} axisLine={false} tickLine={false} width={60} />
           <Tooltip
-            formatter={(value: number) => `${Math.round(value)} units`}
-            labelFormatter={formatDate}
+            formatter={(value) => {
+              const numeric = typeof value === 'number' ? value : Number(value);
+              if (!Number.isFinite(numeric)) return '—';
+              return `${Math.round(numeric)} units`;
+            }}
+            labelFormatter={(label) => formatDate(label)}
           />
           <Legend align="right" verticalAlign="top" height={36} />
           <Bar dataKey="plannedVolume" name="Planned" fill="#c084fc" radius={[4, 4, 0, 0]} />

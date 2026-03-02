@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { PostgrestError } from '@supabase/postgrest-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { supabaseClient } from '@/lib/supabase-browser';
 import { SupabaseWorkoutPlanRow } from '@/types/supabase';
 
