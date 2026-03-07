@@ -11,10 +11,7 @@ function createSupabaseServerClient(): SupabaseClient {
   }
 
   if (!supabaseKey) {
-    const message =
-      'Missing Supabase service role key (required for schedule imports, Strava sync, and report generation). Set SUPABASE_SERVICE_ROLE_KEY or NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY in your environment.';
-    console.error(message);
-    throw new Error(message);
+    throw new Error('Missing Supabase service role key');
   }
 
   return createClient(supabaseUrl, supabaseKey, {
@@ -29,5 +26,3 @@ export function getSupabaseServerClient(): SupabaseClient {
   }
   return cachedClient;
 }
-
-export const supabaseServiceRoleClient = getSupabaseServerClient();

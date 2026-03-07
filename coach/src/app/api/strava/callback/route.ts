@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServiceRoleClient } from '@/lib/supabase-server';
+import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { decodeState, exchangeCodeForToken, storeTokenFromCode } from '@/lib/strava/strava-service';
 
 export async function GET(request: Request) {
@@ -18,7 +18,8 @@ export async function GET(request: Request) {
 
   try {
     const token = await exchangeCodeForToken(code);
-    await storeTokenFromCode(supabaseServiceRoleClient, userId, token);
+    const supabase = getSupabaseServerClient();
+    await storeTokenFromCode(supabase, userId, token);
   } catch (error: unknown) {
     return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }
