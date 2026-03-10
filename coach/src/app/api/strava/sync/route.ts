@@ -37,20 +37,26 @@ export async function POST(request: Request) {
     const supabase = getSupabaseServerClient();
     const { access_token: accessToken } = await ensureFreshStravaTokens(supabase, userId);
 
+    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60;
     let after = payload.after;
 
       if (!after) {
+        
         const { data: latest } = await supabase
         .from('strava_activities')
         .select('start_time')
-      .eq('user_id', userId)
-      .order('start_time', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+        .eq('user_id', userId)
+        .order('start_time', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (latest?.start_time) {
         after = Math.floor(new Date(latest.start_time).getTime() / 1000);
       }
+    }
+
+    if (!after) {
+      after = thirtyDaysAgo;
     }
 
     const { activities, rateLimit } = await fetchStravaActivities(accessToken, after);

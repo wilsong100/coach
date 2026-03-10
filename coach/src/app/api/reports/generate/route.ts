@@ -4,37 +4,6 @@ import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { generateGeminiText } from '@/lib/ai/gemini-client';
 import { loadProgramProfile } from '@/lib/parsers/schedule-parser';
 
-interface WorkoutSessionRow {
-  id: string;
-  scheduled_date: string | null;
-  status: string | null;
-  session_type: string | null;
-  planned_duration_minutes: number | null;
-  actual_duration_minutes: number | null;
-  performance: Record<string, unknown> | null;
-}
-
-interface RunningSessionRow {
-  id: string;
-  week: number | null;
-  day: string | null;
-  run_type: string | null;
-  target_distance_km: number | null;
-  target_pace: string | null;
-  status: string | null;
-  details: string | null;
-  scheduled_date: string | null;
-}
-
-interface StravaActivityRow {
-  id: string;
-  distance_meters: number | null;
-  duration_seconds: number | null;
-  start_time: string | null;
-  average_heartrate: number | null;
-  max_heartrate: number | null;
-}
-
 function formatDateString(date: Date) {
   return date.toISOString().split('T')[0];
 }

@@ -77,6 +77,37 @@ This document describes every route under `coach/src/app/api` that Agent 2 built
 - **Response**: `200` JSON `{ "received": true }` on success or `{ "error": "<message>" }` if verification fails.
 - **Failure modes**: 401 invalid signature, 400 missing `owner_id`, 500 when user lookup or Strava fetch fails.
 
+### `POST /api/strava/manual`
+- **Purpose**: Records a manual run entry (distance + optional pace) and returns the refreshed list of runs so the UI can update without a reload.
+- **Authentication**: Requires the Supabase service-role key because it inserts rows into `public.strava_activities`.
+- **Headers**:
+  - `x-user-id` (optional if `user_id` is included in the JSON body)
+- **Body**:
+  ```json
+  {
+    "user_id": "a1b2c3d4-...",
+    "date": "2026-02-20",
+    "distance_km": 5.2,
+    "pace": "5:00",
+    "notes": "Morning tempo"
+  }
+  ```
+- **Response** (200):
+  ```json
+  {
+    "activities": [
+      {
+        "strava_id": 1700000000000,
+        "activity_type": "Manual Run",
+        "distance_meters": 5200,
+        ...
+      }
+    ]
+  }
+  ```
+  The array mirrors what `useStravaActivities` expects (all columns from `strava_activities`), so the client can replace or refetch immediately.
+- **Failure modes**: 400 missing/invalid payload, 500 if the Supabase insert fails, 500 when the service-role client is unavailable (clear error message logged).
+
 ## Gemini report generation
 
 ### `POST /api/reports/generate`
