@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServiceRoleClient } from '@/lib/supabase-server';
+import { getSupabaseServerClient } from '@/lib/supabase-server';
 import {
   ensureFreshStravaTokens,
   fetchStravaActivities,
@@ -33,7 +33,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
 
-  const { data: user } = await supabaseServiceRoleClient
+  const supabase = getSupabaseServerClient();
+  const { data: user } = await supabase
     .from('users')
     .select('id')
     .eq('athlete_profile->strava->>athlete_id', ownerId.toString())
@@ -41,10 +42,10 @@ export async function POST(request: Request) {
 
   if (user?.id) {
     try {
-      const { access_token: accessToken } = await ensureFreshStravaTokens(supabaseServiceRoleClient, user.id);
+      const { access_token: accessToken } = await ensureFreshStravaTokens(supabase, user.id);
       const { activities } = await fetchStravaActivities(accessToken);
       if (activities.length) {
-        await upsertStravaActivities(supabaseServiceRoleClient, user.id, activities);
+        await upsertStravaActivities(supabase, user.id, activities);
       }
     } catch (error) {
       console.warn('Failed to sync Strava webhook event', error);

@@ -1,4 +1,4 @@
-import { PostgrestError } from '@supabase/postgrest-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { supabaseClient } from '@/lib/supabase-browser';
 import { SupabaseWeeklyReportRow } from '@/types/supabase';
@@ -36,10 +36,12 @@ export function useWeeklyReports(
   config?: UseQueryOptions<SupabaseWeeklyReportRow[], PostgrestError>,
 ) {
   const { queryKey, queryFn, ...rest } = config ?? {};
+  const defaultKey = ['weeklyReports', filters];
+  const defaultFn = () => fetchWeeklyReports(filters);
 
   return useQuery<SupabaseWeeklyReportRow[], PostgrestError>({
-    queryKey: ['weeklyReports', filters],
-    queryFn: () => fetchWeeklyReports(filters),
+    queryKey: queryKey ?? defaultKey,
+    queryFn: queryFn ?? defaultFn,
     staleTime: 1000 * 60 * 5,
     ...rest,
   });

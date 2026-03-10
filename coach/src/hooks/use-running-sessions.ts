@@ -1,4 +1,4 @@
-import { PostgrestError } from '@supabase/postgrest-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { supabaseClient } from '@/lib/supabase-browser';
 import { SupabaseRunningSessionRow } from '@/types/supabase';
@@ -38,10 +38,12 @@ export function useRunningSessions(
   config?: UseQueryOptions<SupabaseRunningSessionRow[], PostgrestError>,
 ) {
   const { queryKey, queryFn, ...rest } = config ?? {};
+  const defaultKey = ['runningSessions', filters];
+  const defaultFn = () => fetchRunningSessions(filters);
 
   return useQuery<SupabaseRunningSessionRow[], PostgrestError>({
-    queryKey: ['runningSessions', filters],
-    queryFn: () => fetchRunningSessions(filters),
+    queryKey: queryKey ?? defaultKey,
+    queryFn: queryFn ?? defaultFn,
     staleTime: 1000 * 60 * 2,
     ...rest,
   });

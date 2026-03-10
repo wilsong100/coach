@@ -6,17 +6,29 @@ const STRAVA_AUTH_URL = `${STRAVA_BASE_URL}/oauth/authorize`;
 const STRAVA_TOKEN_URL = `${STRAVA_BASE_URL}/oauth/token`;
 const STRAVA_ACTIVITIES_URL = `${STRAVA_BASE_URL}/api/v3/athlete/activities`;
 
-const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID;
-const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET;
+function getStravaClientId(): string {
+  const id = process.env.STRAVA_CLIENT_ID;
+  return (typeof id === 'string' ? id.trim() : '') || '';
+}
+
+function getStravaClientSecret(): string {
+  const secret = process.env.STRAVA_CLIENT_SECRET;
+  return (typeof secret === 'string' ? secret.trim() : '') || '';
+}
+
 const STRAVA_WEBHOOK_SECRET = process.env.STRAVA_WEBHOOK_SECRET;
 
 const SCOPE = 'activity:read_all,activity:read';
 const PER_PAGE = 50;
 const MAX_PAGES = 3;
+const RUN_TYPES = new Set(['Run', 'VirtualRun']);
 
-function ensureClientConfig() {
-  if (!STRAVA_CLIENT_ID || !STRAVA_CLIENT_SECRET) {
-    throw new Error('Strava client credentials are not configured');
+
+function ensureClientConfig(): void {
+  const id = getStravaClientId();
+  const secret = getStravaClientSecret();
+  if (!id || !secret) {
+    throw new Error('Strava client credentials are not configured. Set STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET in .env.local and restart the dev server.');
   }
 }
 
@@ -91,7 +103,7 @@ export function buildStravaAuthUrl({ userId, redirectUri }: { userId: string; re
   ensureClientConfig();
   const state = buildAuthState(userId);
   const params = new URLSearchParams({
-    client_id: STRAVA_CLIENT_ID!,
+    client_id: getStravaClientId(),
     redirect_uri: redirectUri,
     response_type: 'code',
     approval_prompt: 'auto',
@@ -114,12 +126,21 @@ async function tokenRequest(body: URLSearchParams) {
   ensureClientConfig();
   const response = await fetch(STRAVA_TOKEN_URL, {
     method: 'POST',
-    body,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: body.toString(),
   });
 
   if (!response.ok) {
     const payload = await response.text();
-    throw new Error(`Strava token request failed (${response.status}): ${payload}`);
+    const status = response.status;
+    if (status === 401 || payload.toLowerCase().includes('invalid') || payload.toLowerCase().includes('api key')) {
+      throw new Error(
+        'Strava rejected the client credentials. Check that STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET in .env.local match your Strava API Application (https://www.strava.com/settings/api) exactly, then restart the dev server. Do not regenerate the Client Secret unless you reconnect Strava afterward.'
+      );
+    }
+    throw new Error(`Strava token request failed (${status}): ${payload}`);
   }
 
   const data = (await response.json()) as StravaTokenResult;
@@ -128,8 +149,8 @@ async function tokenRequest(body: URLSearchParams) {
 
 export async function exchangeCodeForToken(code: string) {
   const body = new URLSearchParams({
-    client_id: STRAVA_CLIENT_ID ?? '',
-    client_secret: STRAVA_CLIENT_SECRET ?? '',
+    client_id: getStravaClientId(),
+    client_secret: getStravaClientSecret(),
     code,
     grant_type: 'authorization_code',
   });
@@ -139,8 +160,8 @@ export async function exchangeCodeForToken(code: string) {
 
 export async function refreshAccessToken(refreshToken: string) {
   const body = new URLSearchParams({
-    client_id: STRAVA_CLIENT_ID ?? '',
-    client_secret: STRAVA_CLIENT_SECRET ?? '',
+    client_id: getStravaClientId(),
+    client_secret: getStravaClientSecret(),
     grant_type: 'refresh_token',
     refresh_token: refreshToken,
   });
@@ -158,6 +179,9 @@ export async function fetchStravaActivities(accessToken: string, after?: number)
       per_page: PER_PAGE.toString(),
       page: page.toString(),
     });
+
+    params.set('include_all_efforts', 'true');
+    params.set('include_heart_rate', 'true');
 
     if (after) {
       params.set('after', Math.floor(after).toString());
@@ -178,11 +202,13 @@ export async function fetchStravaActivities(accessToken: string, after?: number)
 
     const pageData = (await response.json()) as StravaActivity[];
 
+    const runOnly = pageData.filter((activity) => RUN_TYPES.has(activity.type));
+
     if (!pageData.length) {
       break;
     }
 
-    activities.push(...pageData);
+    activities.push(...runOnly);
 
     if (rateLimit && rateLimit.appUsage >= rateLimit.appLimit) {
       break;
@@ -239,6 +265,69 @@ export function mapActivityToRow(activity: StravaActivity, userId: string): Stra
     },
     raw: {
       ...activity,
+    },
+    synced_at: new Date().toISOString(),
+  };
+}
+
+interface ManualActivityInput {
+  userId: string;
+  date: string;
+  distanceKm: number;
+  pace?: string;
+  notes?: string;
+}
+
+function parsePaceString(pace?: string) {
+  if (!pace) return null;
+  const segments = pace.split(':').map((segment) => Number(segment.trim()));
+  if (segments.some((value) => Number.isNaN(value))) {
+    return null;
+  }
+
+  if (segments.length === 1) {
+    return segments[0];
+  }
+
+  if (segments.length === 2) {
+    return segments[0] * 60 + segments[1];
+  }
+
+  return segments[0] * 3600 + segments[1] * 60 + segments[2];
+}
+
+export function buildManualActivityRow(input: ManualActivityInput): StravaActivityRow {
+  const distanceKm = Number(input.distanceKm ?? 0);
+  const distanceMeters = Number((distanceKm * 1000).toFixed(0));
+  const paceSeconds = parsePaceString(input.pace);
+  const durationSeconds =
+    typeof paceSeconds === 'number' && paceSeconds > 0 && distanceKm > 0
+      ? Math.round(paceSeconds * distanceKm)
+      : Math.round(distanceMeters / 3.5) || 0;
+  const averageSpeed = durationSeconds > 0 ? Number((distanceMeters / durationSeconds).toFixed(2)) : null;
+  const startTime = Number.isNaN(Date.parse(input.date)) ? new Date() : new Date(input.date);
+
+  return {
+    id: stableUuid(`manual-strava-${input.userId}-${input.date}-${distanceKm}`),
+    user_id: input.userId,
+    strava_id: Number(Date.now()),
+    name: 'Manual run',
+    activity_type: 'Manual Run',
+    distance_meters: distanceMeters,
+    duration_seconds: durationSeconds,
+    start_time: startTime.toISOString(),
+    average_heartrate: null,
+    max_heartrate: null,
+    pace: {
+      manual_entry: 1,
+      display_seconds_per_km: paceSeconds ?? null,
+      average_speed: averageSpeed,
+    },
+    raw: {
+      manual: true,
+      notes: input.notes ?? null,
+      pace: input.pace ?? null,
+      distance_km: distanceKm,
     },
     synced_at: new Date().toISOString(),
   };

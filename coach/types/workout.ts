@@ -14,6 +14,17 @@ export interface WeeklyStructureNode {
   focus: string;
 }
 
+export interface WorkoutSet {
+  set_number?: number | null;
+  target_reps?: number | string | null;
+  actual_reps?: number | string | null;
+  target_weight?: number | string | null;
+  actual_weight?: number | string | null;
+  rest_seconds?: number | null;
+  tempo?: string | null;
+  notes?: string | null;
+}
+
 export interface RunningProgressionDay {
   speed: string;
   tempo: string;

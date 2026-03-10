@@ -1,4 +1,4 @@
-import { PostgrestError } from '@supabase/postgrest-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { supabaseClient } from '@/lib/supabase-browser';
 import { SupabaseExerciseSetRow } from '@/types/supabase';
@@ -33,10 +33,12 @@ export function useExerciseSets(
   config?: UseQueryOptions<SupabaseExerciseSetRow[], PostgrestError>,
 ) {
   const { queryKey, queryFn, ...rest } = config ?? {};
+  const defaultKey = ['exerciseSets', filters];
+  const defaultFn = () => fetchExerciseSets(filters);
 
   return useQuery<SupabaseExerciseSetRow[], PostgrestError>({
-    queryKey: ['exerciseSets', filters],
-    queryFn: () => fetchExerciseSets(filters),
+    queryKey: queryKey ?? defaultKey,
+    queryFn: queryFn ?? defaultFn,
     staleTime: 1000 * 60,
     ...rest,
   });
