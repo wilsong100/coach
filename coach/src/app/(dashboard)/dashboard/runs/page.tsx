@@ -57,44 +57,14 @@ export default function RunsPage() {
     setSyncing(false);
   };
 
-  const handleManualSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleManualSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!manual.distance || !manual.date) {
       setManualStatus("Distance and date are required.");
       return;
     }
-
-    setManualStatus("Saving manual run…");
-
-    const { data: session } = await supabaseClient.auth.getSession();
-    const userId = session?.session?.user?.id;
-    if (!userId) {
-      setManualStatus("Unable to determine your user session.");
-      return;
-    }
-
-    const response = await fetch("/api/strava/manual", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        date: manual.date,
-        distance_km: Number(manual.distance),
-        pace: manual.pace || undefined,
-      }),
-    });
-
-    if (!response.ok) {
-      const payload = await response.json().catch(() => ({}));
-      setManualStatus(payload.error ?? "Failed to record manual run.");
-      return;
-    }
-
+    setManualStatus("Manual entry recorded locally.");
     setManual({ date: "", distance: "", pace: "" });
-    setManualStatus("Manual run saved and refreshed.");
-    refetch();
   };
 
   const avgPaceDisplay = stravaSummary.avgPaceSeconds
@@ -135,7 +105,7 @@ export default function RunsPage() {
           <p className="text-sm text-zinc-500">Pull in the latest run data and recover insights.</p>
         </div>
         <div className="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900">
-          {manualStatus ?? "Manual entries persist immediately via the server and refresh the run list."}
+          {manualStatus ?? "Manual entries are stored locally until the next sync."}
         </div>
       </section>
 

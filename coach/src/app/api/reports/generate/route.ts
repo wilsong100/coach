@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createHash } from 'node:crypto';
-import { supabaseServiceRoleClient } from '@/lib/supabase-server';
+import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { generateGeminiText } from '@/lib/ai/gemini-client';
 import { loadProgramProfile } from '@/lib/parsers/schedule-parser';
 
@@ -76,21 +76,23 @@ export async function POST(request: Request) {
   const startIso = formatDateString(start);
   const endIso = formatDateString(end);
 
+  const supabase = getSupabaseServerClient();
+
   const [workoutRes, runningRes, stravaRes] = await Promise.all([
-    supabaseServiceRoleClient
-      .from<WorkoutSessionRow>('workout_sessions')
+    supabase
+      .from('workout_sessions')
       .select('id,scheduled_date,status,session_type,planned_duration_minutes,actual_duration_minutes,performance')
       .eq('user_id', userId)
       .order('scheduled_date', { ascending: false })
       .limit(100),
-    supabaseServiceRoleClient
-      .from<RunningSessionRow>('running_sessions')
+    supabase
+      .from('running_sessions')
       .select('id,week,day,run_type,target_distance_km,target_pace,status,details,scheduled_date')
       .eq('user_id', userId)
       .order('scheduled_date', { ascending: false })
       .limit(100),
-    supabaseServiceRoleClient
-      .from<StravaActivityRow>('strava_activities')
+    supabase
+      .from('strava_activities')
       .select('id,distance_meters,duration_seconds,start_time,average_heartrate,max_heartrate')
       .eq('user_id', userId)
       .gte('start_time', start.toISOString())
@@ -119,7 +121,7 @@ export async function POST(request: Request) {
       const actual = Number(session.actual_duration_minutes ?? 0);
       const rawSets = session.performance?.['sets'];
       const sets = Array.isArray(rawSets) ? (rawSets as Array<Record<string, unknown>>) : [];
-      const { volume, setsCount, reps } = sets.reduce(
+      const { volume, setsCount, reps } = sets.reduce<{ volume: number; setsCount: number; reps: number }>(
         (innerAcc, set) => {
           const targetReps = Number(set['target_reps'] ?? set['actual_reps'] ?? 0);
           const actualReps = Number(set['actual_reps'] ?? set['target_reps'] ?? 0);
@@ -242,7 +244,7 @@ export async function POST(request: Request) {
     status: 'generated',
   };
 
-  const { error: reportError } = await supabaseServiceRoleClient.from('weekly_reports').upsert(reportPayload, {
+  const { error: reportError } = await supabase.from('weekly_reports').upsert(reportPayload, {
     onConflict: 'id',
   });
 

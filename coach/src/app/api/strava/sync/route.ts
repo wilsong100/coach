@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServiceRoleClient } from '@/lib/supabase-server';
+import { getSupabaseServerClient } from '@/lib/supabase-server';
 import {
   ensureFreshStravaTokens,
   fetchStravaActivities,
@@ -34,13 +34,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { access_token: accessToken } = await ensureFreshStravaTokens(supabaseServiceRoleClient, userId);
+    const supabase = getSupabaseServerClient();
+    const { access_token: accessToken } = await ensureFreshStravaTokens(supabase, userId);
 
     const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60;
     let after = payload.after;
 
-    if (!after) {
-      const { data: latest } = await supabaseServiceRoleClient
+      if (!after) {
+        const { data: latest } = await supabase
         .from('strava_activities')
         .select('start_time')
         .eq('user_id', userId)
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
     const { activities, rateLimit } = await fetchStravaActivities(accessToken, after);
 
     if (activities.length) {
-      await upsertStravaActivities(supabaseServiceRoleClient, userId, activities);
+      await upsertStravaActivities(supabase, userId, activities);
     }
 
     const result: SyncResult = {
