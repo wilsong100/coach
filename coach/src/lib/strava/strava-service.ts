@@ -13,6 +13,7 @@ const STRAVA_WEBHOOK_SECRET = process.env.STRAVA_WEBHOOK_SECRET;
 const SCOPE = 'activity:read_all,activity:read';
 const PER_PAGE = 50;
 const MAX_PAGES = 3;
+const RUN_TYPES = new Set(['Run', 'VirtualRun']);
 
 function ensureClientConfig() {
   if (!STRAVA_CLIENT_ID || !STRAVA_CLIENT_SECRET) {
@@ -159,6 +160,9 @@ export async function fetchStravaActivities(accessToken: string, after?: number)
       page: page.toString(),
     });
 
+    params.set('include_all_efforts', 'true');
+    params.set('include_heart_rate', 'true');
+
     if (after) {
       params.set('after', Math.floor(after).toString());
     }
@@ -178,11 +182,13 @@ export async function fetchStravaActivities(accessToken: string, after?: number)
 
     const pageData = (await response.json()) as StravaActivity[];
 
+    const runOnly = pageData.filter((activity) => RUN_TYPES.has(activity.type));
+
     if (!pageData.length) {
       break;
     }
 
-    activities.push(...pageData);
+    activities.push(...runOnly);
 
     if (rateLimit && rateLimit.appUsage >= rateLimit.appLimit) {
       break;

@@ -209,6 +209,7 @@ JURISDICTION (only edit here)
 
 MISSION
 Build the core UI: dashboard, charts, workout logger, running view, onboarding. Use the hooks/types provided by the data layer.
+Target a mobile‑first layout— prioritize touch-friendly spacing (44px tap targets), responsive cards, and collapsed states for small screens before scaling up to desktop.
 
 TASKS
 1) Dashboard
@@ -240,6 +241,8 @@ CONSTRAINTS
 - Don't implement Strava/Gemini logic inside UI; call existing endpoints/hooks.
 - No secrets anywhere in UI code.
 - Keep the UI clean, modern, and accessible.
+- read api-contracts.md and integration-helpers.md (for Agent 2’s routes/helpers) plus database-schema.md (for shapes) before wiring data.
+- must consume the typed hooks from coach/src/hooks/ and the query-client 
 
 STATUS REPORTING (REQUIRED)
 You MUST report your status at these times:
