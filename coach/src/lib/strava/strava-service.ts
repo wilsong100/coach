@@ -23,6 +23,7 @@ const PER_PAGE = 50;
 const MAX_PAGES = 3;
 const RUN_TYPES = new Set(['Run', 'VirtualRun']);
 
+
 function ensureClientConfig(): void {
   const id = getStravaClientId();
   const secret = getStravaClientSecret();

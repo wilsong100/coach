@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     let after = payload.after;
 
       if (!after) {
+        
         const { data: latest } = await supabase
         .from('strava_activities')
         .select('start_time')
