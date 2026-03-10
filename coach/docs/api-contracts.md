@@ -56,6 +56,8 @@ This document describes every route under `coach/src/app/api` that Agent 2 built
   ```
 - **Rate-limit behavior**: When the app-wide rate limit is hit, the route returns **429** with the same body so callers know to back off. The service fetches at most 3 pages per request; hitting 600 requests per 15 minutes (Strava's documented ceiling per app) will stop further pages and send 429.
 - **Other failure modes**: 400 missing user ID, 500 when Strava returns an error or Supabase upsert fails.
+- **Filtering details**: When no previous sync exists we default `after` to 30 days ago so you only pull the most recent month; once activities exist we fetch only records newer than the latest `start_time`.  
+- **Run-only data**: We filter the Strava response so only `Run`/`VirtualRun` activities are stored, and we include `include_all_efforts=true` when calling the API. The `raw` column therefore carries `segment_efforts`, `average_speed`, `max_speed`, `elev_high`, etc., so clients can surface segment summaries or pace/heart-rate metadata without re-calling Strava.
 
 ### `POST /api/strava/webhook`
 - **Purpose**: Handles Strava webhook events (`activity`, `create`, `update`). If `.env` has `STRAVA_WEBHOOK_SECRET`, the route validates `x-strava-signature` before processing.
@@ -138,3 +140,29 @@ This document describes every route under `coach/src/app/api` that Agent 2 built
 - Always call these routes from server-side environments (Edge Functions, API routes, or server actions) to keep the Supabase service-role key private.
 - Handle 429 from `/api/strava/sync` gracefully (retry after a pause); the route includes `rateLimit` metadata so you can surface pacing to the user.
 - When consuming `/api/reports/generate`, treat the returned `text` as markdown/paragraphs; it already includes sections for strength, running, plan comparison, and adjustments.
+
+## Schedule import
+
+### `POST /api/schedule/import`
+- **Purpose**: Reads the canonical `coach/docs/schedule.json` file (relative to the repo root) and seeds `workout_plans` + `running_sessions` for the 12-week program.
+- **Headers**: `x-user-id` optional if `user_id` is supplied in the payload.
+- **Body**:
+  ```json
+  {
+    "user_id": "a1b2c3d4-...",
+    "start_date": "2026-06-01"
+  }
+  ```
+  `start_date` lets the user choose which calendar day begins the next 12 weeks; it defaults to today when omitted. The import path is hardcoded to `docs/schedule.json`, so ensure that file exists in your repository root (the helper uses `path.join(process.cwd(), 'docs', 'schedule.json')`).
+- **Response**:
+  ```json
+  {
+    "programName": "12-Week Sub-20 5K & Strength Integration",
+    "workoutsInserted": 1,
+    "runsInserted": 36,
+    "startDate": "2026-06-01",
+    "endDate": "2026-08-30",
+    "user_id": "a1b2c3d4-..."
+  }
+  ```
+- **Failure modes**: 400 when `user_id` is missing, 500 when the service-role key is not configured (the route now checks for `SUPABASE_SERVICE_ROLE_KEY`/`NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY`) or when the schedule file cannot be found/read at `coach/docs/schedule.json`.

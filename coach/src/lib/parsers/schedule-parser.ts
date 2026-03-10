@@ -37,6 +37,8 @@ export interface ScheduleImportResult {
   programName: string;
   workoutsInserted: number;
   runsInserted: number;
+  startDate: string;
+  endDate: string;
 }
 
 function stableUuid(value: string) {
@@ -49,9 +51,14 @@ async function loadSchedule(): Promise<ScheduleDocument> {
   return JSON.parse(contents) as ScheduleDocument;
 }
 
+export interface ImportScheduleOptions {
+  startDate?: string;
+}
+
 export async function importScheduleForUser(
   client: SupabaseClient,
   userId: string,
+  options?: ImportScheduleOptions,
 ): Promise<ScheduleImportResult> {
   if (!userId) {
     throw new Error('User ID is required to import the schedule');
@@ -60,14 +67,19 @@ export async function importScheduleForUser(
   const schedule = await loadSchedule();
   const programName = schedule.program_name;
 
+  const start = options?.startDate ? new Date(options.startDate) : new Date();
+  const safeStart = Number.isNaN(start.getTime()) ? new Date() : start;
+  const end = new Date(safeStart);
+  end.setUTCDate(end.getUTCDate() + 7 * 12 - 1);
+
   const workoutPlanRows = [
     {
       id: stableUuid(`schedule-plan-${userId}-${programName}`),
       user_id: userId,
       program_name: programName,
       phase: schedule.periodization_phases[0]?.phase ?? 'foundation',
-      start_date: null,
-      end_date: null,
+      start_date: safeStart.toISOString().split('T')[0],
+      end_date: end.toISOString().split('T')[0],
       schedule: schedule.weekly_structure,
       progress: {},
       metadata: {
@@ -132,6 +144,8 @@ export async function importScheduleForUser(
     programName,
     workoutsInserted: workoutPlanRows.length,
     runsInserted: runningRows.length,
+    startDate: safeStart.toISOString().split('T')[0],
+    endDate: end.toISOString().split('T')[0],
   };
 }
 
